@@ -155,8 +155,6 @@ Routing, retry, failover, caching, streaming
 **Phase 5 — Polish**
 Metrics, structured logging, Docker, core tests
 
-*(No separate "Production" phase — CI/CD, observability dashboards, and multi-region concerns are deferred; they're infra learning, not Fastify learning.)*
-
 ---
 
 ## Learning Outcomes
