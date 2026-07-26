@@ -1,6 +1,6 @@
 # AI Gateway
 
-A production-style AI Gateway built with **Fastify**, providing a unified interface to multiple LLM providers (AI, Ollama) with caching, rate limiting, retries, and streaming.
+A production-style AI Gateway built with **Fastify**, providing a unified interface to multiple LLM providers (a cloud provider + Ollama, local) with caching, rate limiting, retries, and streaming.
 
 Built as a hands-on Fastify learning project — the goal is to go deep on Fastify's plugin architecture, hooks, decorators, and schema validation, not to clone commercial gateways like Portkey or LiteLLM.
 
@@ -18,7 +18,7 @@ Calling AI providers directly from client apps creates real problems:
 AI Gateway sits between clients and providers, handling auth, routing, caching, retries, and observability in one place.
 
 ```
-Client → AI Gateway → { AI | Ollama }
+Client → AI Gateway → { Cloud Provider | Ollama (local) }
 ```
 
 ---
@@ -28,7 +28,7 @@ Client → AI Gateway → { AI | Ollama }
 This project is intentionally scoped to what teaches **Fastify** deeply, rather than maximum feature count. Two providers is enough to prove the abstraction works — a third is trivial to add later and doesn't teach anything new.
 
 **In scope (v1):**
-- Chat completion + streaming (SSE) across 2 providers (OpenAI, Ollama)
+- Chat completion + streaming (SSE) across 2 providers (a cloud provider, Ollama)
 - API key auth + basic rate limiting (Redis)
 - Request validation via JSON Schema + auto-generated Swagger docs
 - Response caching (Redis) for repeated prompts
@@ -43,7 +43,7 @@ This project is intentionally scoped to what teaches **Fastify** deeply, rather 
 
 | Layer | Choice |
 |---|---|
-| Framework | Fastify + TypeScript |
+| Framework | Fastify + JavaScript (ES Modules) |
 | Database | PostgreSQL + Prisma |
 | Cache | Redis |
 | Queue | BullMQ |
@@ -74,7 +74,7 @@ This project is intentionally scoped to what teaches **Fastify** deeply, rather 
                         │
               ┌─────────┴─────────┐
               ▼                   ▼
-              AI              Ollama
+        Cloud Provider          Ollama
               │                   │
               └─────────┬─────────┘
                         ▼
@@ -119,6 +119,19 @@ ai-gateway/
 **AI** — Chat completion, streaming, model selection
 **Providers** — One adapter per provider behind a shared interface:
 
+```js
+// Every provider adapter implements this shape
+class AIProvider {
+  async chat(request) {
+    // returns a ChatResponse
+  }
+
+  async *stream(request) {
+    // yields ChatChunk objects
+  }
+}
+```
+
 **Cache** — Redis-backed prompt caching with TTL and invalidation
 **Health** — `/health`, `/health/live`, `/health/ready`
 
@@ -147,25 +160,13 @@ Project structure, plugins, env config, logging, Swagger
 API keys, JWT, basic RBAC
 
 **Phase 3 — Providers**
-OpenAI + Ollama adapters behind a shared interface
+Cloud provider (OpenAI-compatible API — could be OpenAI, Groq, Gemini, etc.) + Ollama adapters behind a shared interface
 
 **Phase 4 — Gateway Intelligence**
 Routing, retry, failover, caching, streaming
 
 **Phase 5 — Polish**
 Metrics, structured logging, Docker, core tests
-
----
-
-## Learning Outcomes
-
-By the end of this project:
-- Fastify plugin architecture and encapsulation boundaries
-- Decorators and hooks as an alternative to Express middleware chains
-- JSON Schema-driven validation and auto docs
-- Streaming responses over Fastify
-- Provider abstraction / adapter pattern for external APIs
-- Applying existing Redis/BullMQ knowledge in a new framework context
 
 ---
 
