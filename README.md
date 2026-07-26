@@ -95,17 +95,17 @@ ai-gateway/
 │   │   ├── cache/
 │   │   └── health/
 │   ├── plugins/
-│   │   ├── redis.ts
-│   │   ├── prisma.ts
-│   │   ├── jwt.ts
-│   │   ├── logger.ts
-│   │   └── swagger.ts
+│   │   ├── redis.js
+│   │   ├── prisma.js
+│   │   ├── jwt.js
+│   │   ├── logger.js
+│   │   └── swagger.js
 │   ├── hooks/
 │   ├── decorators/
 │   ├── routes/
 │   ├── config/
-│   ├── app.ts
-│   └── server.ts
+│   ├── app.js
+│   └── server.js
 ├── tests/
 ├── docker/
 └── docker-compose.yml
