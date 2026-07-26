@@ -18,7 +18,7 @@ Calling AI providers directly from client apps creates real problems:
 AI Gateway sits between clients and providers, handling auth, routing, caching, retries, and observability in one place.
 
 ```
-Client → AI Gateway → { OpenAI | Ollama }
+Client → AI Gateway → { AI | Ollama }
 ```
 
 ---
