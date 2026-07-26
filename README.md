@@ -1,6 +1,6 @@
 # AI Gateway
 
-A production-style AI Gateway built with **Fastify**, providing a unified interface to multiple LLM providers (OpenAI, Ollama) with caching, rate limiting, retries, and streaming.
+A production-style AI Gateway built with **Fastify**, providing a unified interface to multiple LLM providers (AI, Ollama) with caching, rate limiting, retries, and streaming.
 
 Built as a hands-on Fastify learning project — the goal is to go deep on Fastify's plugin architecture, hooks, decorators, and schema validation, not to clone commercial gateways like Portkey or LiteLLM.
 
