@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 
 
 export function buildApp(opts = {}) {
-    const app = Fadtify({
+    const app = Fastify({
         logger: opts.logger?? {
             level: process.env.LOG_LEVEL || 'info',
             transport: process.env.NODE_ENV === 'development' ? {
@@ -20,6 +20,10 @@ export function buildApp(opts = {}) {
     app.register(import('./plugins/env.js'));
     app.register(import('./plugins/logger.js'));
     app.register(import('./plugins/swagger.js'));
+    app.register(import('./plugins/prisma.js'));
+    app.register(import('./plugins/jwt.js'));
+    app.register(import('./plugins/rbac.js'));
+    app.register(import('./modules/auth/auth.routes.js'), { prefix: '/v1/auth' });
 
     return app;
 }
