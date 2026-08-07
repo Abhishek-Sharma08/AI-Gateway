@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 export default async function authRoutes(fastify){
     fastify.post('/keys', {
-        preHandler: [fastify.authenticate], 
+
     },
     async (req, res) => {
         const key = `sk-${crypto.randomUUID()}`;

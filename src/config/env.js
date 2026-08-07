@@ -8,7 +8,7 @@ export const envSchema = {
         DATABASE_URL: { type: 'string' },
         REDIS_URL: { type: 'string' },
         JWT_SECRET: { type: 'string' },
-        OPENAI_API_KEY: { type: 'string' },
+        GEMINI_API_KEY: { type: 'string' },
         OLLAMA_BASE_URL: { type: 'string', default: 'http://localhost:11434' },
     }
 }

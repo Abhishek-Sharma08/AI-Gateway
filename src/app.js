@@ -21,9 +21,12 @@ export function buildApp(opts = {}) {
     app.register(import('./plugins/logger.js'));
     app.register(import('./plugins/swagger.js'));
     app.register(import('./plugins/prisma.js'));
-    app.register(import('./plugins/jwt.js'));
-    app.register(import('./plugins/rbac.js'));
     app.register(import('./modules/auth/auth.routes.js'), { prefix: '/v1/auth' });
+    app.register(import('./plugins/http-client.js'));
+    app.register(import('./plugins/ai.js'));    
+    app.register(import('./modules/ai/ai.routes.js'), {
+        prefix: '/v1',
+    });
 
     return app;
 }
