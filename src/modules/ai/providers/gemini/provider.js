@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import AIProvider from "../base/provider.js";
 
 export default class GeminiAiProvider extends AIProvider {
@@ -8,8 +7,6 @@ export default class GeminiAiProvider extends AIProvider {
     }
 
     async chat(request) {
-        console.log("INSIDE GEMINI PROVIDER");
-
         const { body, statusCode } = await this.http.request(
             `https://generativelanguage.googleapis.com/v1beta/models/${request.model}:generateContent?key=${this.config.apiKey}`,
             {
@@ -26,22 +23,42 @@ export default class GeminiAiProvider extends AIProvider {
                             },
                         ],
                     })),
+                    generationConfig: {
+                        thinkingConfig: {
+                            thinkingBudget: request.thinkingBudget ?? 0,
+                        },
+                    },
                 }),
             }
-        );
+        )
 
         const response = await body.json();
 
-        console.log("========== GEMINI ==========");
-        console.log("Status:", statusCode);
-        console.dir(response, { depth: null });
-        console.log("============================");
+        return this.#normalize(response, request.model);
+    }
 
-        // TEMPORARY: return raw response for debugging
-        return response;
+    #normalize(response, model) {
+        const candidate = response.candidates?.[0];
+        const content = candidate?.content?.parts?.map(p => p.text).join("") ?? "";
+
+        return {
+            id: response.responseId ?? null,
+            provider: "gemini",
+            model,
+            message: {
+                role: "assistant",
+                content,
+            },
+            usage: {
+                promptTokens: response.usageMetadata?.promptTokenCount ?? 0,
+                completionTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
+                totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
+            },
+            finishReason: candidate?.finishReason ?? null,
+        }
     }
 
     async *stream() {
-        throw new Error("Not implemented");
+        throw new Error("Not implemented")
     }
 }

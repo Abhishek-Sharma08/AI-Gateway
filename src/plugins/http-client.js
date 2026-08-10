@@ -18,7 +18,7 @@ async function httpClientPlugin(fastify) {
     })
 
     fastify.addHook("onClose", async () => {
-        await agennt.close();
+        await agent.close();
     })
 }
 

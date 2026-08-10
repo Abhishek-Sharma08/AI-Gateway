@@ -8,6 +8,7 @@ export default class AIService {
         model,
         messages,
         stream = false,
+        thinkingBudget = 0,
     }) {
         const aiProvider = this.providerManager.get(provider);
 
@@ -16,11 +17,9 @@ export default class AIService {
         }
 
         if(stream) {
-            return aiProvider.chat({ model, messages });
+            return aiProvider.stream({ model, messages, thinkingBudget });
         }
 
-            console.log("Provider", provider);
-            
-        return aiProvider.chat({ model, messages });
+        return aiProvider.chat({ model, messages, thinkingBudget });
     }
 }

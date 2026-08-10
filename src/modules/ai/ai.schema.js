@@ -14,6 +14,12 @@ export const chatCompletionSchema = {
                 type: "boolean",
                 default: false,
             },
+            thinkingBudget: {
+                type: "integer",
+                default: 0,
+                minimum: 0,
+                description: "Gemini-only: caps internal reasoning tokens. 0 disables thinking entirely. Ignored by providers that don't support it.",
+            },
             messages: {
                 type: "array",
                 minItems: 1,

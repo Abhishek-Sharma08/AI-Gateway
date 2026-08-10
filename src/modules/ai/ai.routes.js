@@ -7,6 +7,7 @@ async function aiRoutes(fastify) {
         "/chat/completions",
         {
             schema: chatCompletionSchema,
+            preHandler: fastify.validateApiKey,
         },
         async (req, res) => {
 
