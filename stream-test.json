@@ -1,0 +1,11 @@
+{
+    "provider": "gemini",
+    "model": "gemini-3.5-flash",
+    "messages": [
+        {
+            "role": "user",
+            "content": "tell me a short joke"
+        }
+    ],
+    "stream": true
+}
