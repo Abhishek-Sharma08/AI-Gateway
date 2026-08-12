@@ -21,6 +21,9 @@ export function buildApp(opts = {}) {
     app.register(import('./plugins/logger.js'));
     app.register(import('./plugins/swagger.js'));
     app.register(import('./plugins/prisma.js'));
+    app.register(import('./plugins/redis.js'));
+    app.register(import('./plugins/rate-limit.js'));
+    app.register(import('./modules/health/health.routes.js'));
     app.register(import('./plugins/api-key.js'));
     app.register(import('./plugins/http-client.js'));
     app.register(import('./plugins/ai.js'));    

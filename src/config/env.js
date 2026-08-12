@@ -1,6 +1,6 @@
 export const envSchema = {
     type: 'object',
-required: ['DATABASE_URL', 'API_KEY'],
+required: ['DATABASE_URL', 'API_KEY', 'REDIS_URL'],
     properties: {
         PORT: { type: 'number', default: 3000 },
         NODE_ENV: { type: 'string', default: 'development' },
