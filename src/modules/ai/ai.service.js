@@ -1,8 +1,13 @@
+import { buildCacheKey } from "./cache-key.js";
+
+const CACHE_TTL_SECONDS = 300; // 5 minutes
+
 export default class AIService {
-    constructor(providerManager) {
+    constructor(providerManager, redis) {
         this.providerManager = providerManager;
+        this.redis = redis;
     }
-    
+
     async chat({
         provider = "gemini",
         model,
@@ -12,14 +17,55 @@ export default class AIService {
     }) {
         const aiProvider = this.providerManager.get(provider);
 
-        if(!aiProvider) {
+        if (!aiProvider) {
             throw new Error(`Provider ${provider} not found`);
         }
 
-        if(stream) {
-            return aiProvider.stream({ model, messages, thinkingBudget });
+        const cacheKey = buildCacheKey({ provider, model, messages, thinkingBudget });
+        const cached = await this.redis.get(cacheKey);
+
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            return stream ? this.#replayAsStream(parsed) : parsed;
         }
 
-        return aiProvider.chat({ model, messages, thinkingBudget });
+        if (stream) {
+            return this.#streamAndCache(aiProvider, { model, messages, thinkingBudget }, cacheKey);
+        }
+
+        const result = await aiProvider.chat({ model, messages, thinkingBudget });
+        await this.redis.set(cacheKey, JSON.stringify(result), "EX", CACHE_TTL_SECONDS);
+        return result;
+    }
+
+    async *#streamAndCache(aiProvider, request, cacheKey) {
+        let fullContent = "";
+        let lastMeta = { provider: request.provider, model: request.model };
+
+        for await (const chunk of aiProvider.stream(request)) {
+            fullContent += chunk.delta;
+            lastMeta = { provider: chunk.provider, model: chunk.model };
+            yield chunk;
+        }
+
+        const normalized = {
+            id: null,
+            provider: lastMeta.provider,
+            model: lastMeta.model,
+            message: { role: "assistant", content: fullContent },
+            usage: null, 
+            finishReason: "STOP",
+        };
+
+        await this.redis.set(cacheKey, JSON.stringify(normalized), "EX", CACHE_TTL_SECONDS);
+    }
+
+    async *#replayAsStream(normalized) {
+        yield {
+            delta: normalized.message.content,
+            provider: normalized.provider,
+            model: normalized.model,
+            cached: true,
+        };
     }
 }
