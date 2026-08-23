@@ -3,9 +3,10 @@ import { buildCacheKey } from "./cache-key.js";
 const CACHE_TTL_SECONDS = 300; // 5 minutes
 
 export default class AIService {
-    constructor(providerManager, redis) {
+    constructor(providerManager, redis, metrics) {
         this.providerManager = providerManager;
         this.redis = redis;
+        this.metrics = metrics;
     }
 
     async chat({
@@ -25,9 +26,12 @@ export default class AIService {
         const cached = await this.redis.get(cacheKey);
 
         if (cached) {
+            this.metrics.cacheHits++;
             const parsed = JSON.parse(cached);
             return stream ? this.#replayAsStream(parsed) : parsed;
         }
+
+        this.metrics.cacheMisses++;
 
         if (stream) {
             return this.#streamAndCache(aiProvider, { model, messages, thinkingBudget }, cacheKey);
@@ -53,7 +57,7 @@ export default class AIService {
             provider: lastMeta.provider,
             model: lastMeta.model,
             message: { role: "assistant", content: fullContent },
-            usage: null, 
+            usage: null,
             finishReason: "STOP",
         };
 

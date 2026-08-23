@@ -22,7 +22,7 @@ async function aiPlugin(fastify) {
 
     fastify.decorate('providerManager', providerManager);
 
-    const aiService = new AIService(providerManager, fastify.redis);
+    const aiService = new AIService(providerManager, fastify.redis, fastify.metrics);
     fastify.decorate('aiService', aiService);
 }
 
