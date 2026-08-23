@@ -1,4 +1,5 @@
 import AIProvider from "../base/provider.js";
+import { withRetry } from "../../retry.js";
 
 export default class GeminiAiProvider extends AIProvider {
     constructor(config, http) {
@@ -7,6 +8,10 @@ export default class GeminiAiProvider extends AIProvider {
     }
 
     async chat(request) {
+        return withRetry(() => this.#doChat(request));
+    }
+
+    async #doChat(request) {
         const { body, statusCode } = await this.http.request(
             `https://generativelanguage.googleapis.com/v1beta/models/${request.model}:generateContent?key=${this.config.apiKey}`,
             {
@@ -25,10 +30,19 @@ export default class GeminiAiProvider extends AIProvider {
         );
 
         const response = await body.json();
+
+        if (statusCode >= 400) {
+            const err = new Error(response.error?.message ?? "Gemini request failed");
+            err.statusCode = statusCode;
+            throw err;
+        }
+
         return this.#normalize(response, request.model);
     }
 
     async *stream(request) {
+        // unchanged - streaming doesn't get retry wrapping, since retrying
+        // mid-stream after some chunks already sent to the client isn't safe
         const { body } = await this.http.request(
             `https://generativelanguage.googleapis.com/v1beta/models/${request.model}:streamGenerateContent?alt=sse&key=${this.config.apiKey}`,
             {
@@ -50,7 +64,7 @@ export default class GeminiAiProvider extends AIProvider {
         for await (const chunk of body) {
             buffer += chunk.toString();
             const lines = buffer.split("\n");
-            buffer = lines.pop(); 
+            buffer = lines.pop();
 
             for (const line of lines) {
                 if (!line.startsWith("data: ")) continue;
