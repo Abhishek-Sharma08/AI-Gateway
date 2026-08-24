@@ -170,20 +170,6 @@ Metrics, structured logging, Docker, core tests
 
 ---
 
-## Future Enhancements
-
-Parked intentionally — revisit only if the core project is finished and there's a specific reason to extend it:
-
-- Additional providers (Claude, Groq, OpenRouter)
-- Billing/subscriptions, usage-based quotas
-- Multi-tenant organizations, team workspaces
-- Semantic caching, prompt templates
-- Kubernetes, multi-region deployment
-- Prometheus/Grafana, OpenTelemetry tracing
-- SDK generation, webhook system
-
----
-
 ## License
 
 MIT
