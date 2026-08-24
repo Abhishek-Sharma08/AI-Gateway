@@ -13,9 +13,12 @@ async function aiPlugin(fastify) {
         fastify.http
     );
 
-    const ollama = new OllamaAiProvider({
-        baseUrl: fastify.config.OLLAMA_BASE_URL,
-    });
+    const ollama = new OllamaAiProvider(
+        {
+            baseUrl: fastify.config.OLLAMA_BASE_URL,
+        },
+        fastify.http
+    );
 
     providerManager.register("gemini", gemini);
     providerManager.register("ollama", ollama);

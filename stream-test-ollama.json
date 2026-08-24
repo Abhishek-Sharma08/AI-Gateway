@@ -1,6 +1,6 @@
 {
-    "provider": "gemini",
-    "model": "gemini-3.5-flash",
+    "provider": "ollama",
+    "model": "llama3.2",
     "messages": [
         {
             "role": "user",
@@ -8,4 +8,4 @@
         }
     ],
     "stream": true
-}   
+}
