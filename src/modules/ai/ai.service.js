@@ -2,6 +2,9 @@ import { buildCacheKey } from "./cache-key.js";
 
 const CACHE_TTL_SECONDS = 300; // 5 minutes
 
+const FALLBACK_PROVIDER = { gemini: "ollama", ollama: "gemini" };
+const DEFAULT_MODEL = { gemini: "gemini-3.5-flash", ollama: "llama3.2" };
+
 export default class AIService {
     constructor(providerManager, redis, metrics) {
         this.providerManager = providerManager;
@@ -37,9 +40,35 @@ export default class AIService {
             return this.#streamAndCache(aiProvider, { model, messages, thinkingBudget }, cacheKey);
         }
 
-        const result = await aiProvider.chat({ model, messages, thinkingBudget });
-        await this.redis.set(cacheKey, JSON.stringify(result), "EX", CACHE_TTL_SECONDS);
-        return result;
+        try {
+            const result = await aiProvider.chat({ model, messages, thinkingBudget });
+            await this.redis.set(cacheKey, JSON.stringify(result), "EX", CACHE_TTL_SECONDS);
+            return result;
+        } catch (error) {
+            return this.#tryFallback(provider, { messages, thinkingBudget },
+                cacheKey, error)
+        }
+    }
+
+    async #tryFallback(failedProvider, request, cacheKey, originalError) {
+        const fallbackName = FALLBACK_PROVIDER[failedProvider];
+        const fallbackProvider =  fallbackName && this.providerManager.get(fallbackName);
+
+        if(!fallbackProvider) {
+            throw originalError;
+        }
+
+
+        try {
+            const fallbackModel =   DEFAULT_MODEL[fallbackName];
+            const result = await fallbackProvider.chat({...request, model: fallbackModel});
+            result.failedOver = { from: failedProvider, to: fallbackName };
+            await this.redis.set(cacheKey, JSON.stringify(result), "EX", CACHE_TTL_SECONDS);
+            return result;
+       } catch (fallbackError) {
+            throw originalError;
+            
+        }
     }
 
     async *#streamAndCache(aiProvider, request, cacheKey) {

@@ -4,8 +4,8 @@
     "messages": [
         {
             "role": "user",
-            "content": "tell me a short joke"
+            "content": "what year did the first moon landing happen"
         }
     ],
-    "stream": true
-}   
+    "stream": false
+}
